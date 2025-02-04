@@ -6,7 +6,7 @@ player_area equ 0x8B24979
 icon_x equ 0
 icon_y equ 225
 
-.include "gpu_macros.asm"
+.include "./src/gpu_macros.asm"
 
 .macro lih,dest,value
 	lui			at, value / 0x10000
@@ -23,7 +23,7 @@ icon_y equ 225
 	sh			orig, value & 0xFFFF(at)
 .endmacro
 
-.createfile "CAMERA.bin", 0x8800000
+.createfile "./bin/CAMERA.bin", 0x8800000
 	// constants
 .area 0x10, 0x0
 pi2:
@@ -141,7 +141,7 @@ selected_monster:
 
 .close
 
-.createfile "RENDER.bin", 0x08800A00
+.createfile "./bin/RENDER.bin", 0x08800A00
 ;  ICON RENDERING
 
 .func render

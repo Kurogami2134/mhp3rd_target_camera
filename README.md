@@ -2,8 +2,9 @@
 
 Adds target camera, similar to that of Monster Hunter 4 to Monster Hunter Portable 3rd.
 
-## Installing
+## Compiling
 
+In a Linux environment, you will need Make and CMake. Use `make deps` to install the dependencies and `make` to generate the binaries and the `CHEATS.TXT` file
 
 
 ## Usage

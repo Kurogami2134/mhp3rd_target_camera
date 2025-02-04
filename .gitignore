@@ -1,0 +1,6 @@
+bin/
+modio/
+armips/
+*.txt
+cwcheatio.py
+__pycache__

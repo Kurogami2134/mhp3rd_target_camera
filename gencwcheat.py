@@ -1,4 +1,4 @@
-var = 142606588
+var = 142609660
 
 #from filewrappers import CWCheatFileDescriptor as cwcheatfd
 from cwcheatio import CwCheatIO
@@ -10,7 +10,7 @@ file = CwCheatIO("CHEATS.TXT")
 #file.write(b'\x4b\x00\x20\x0e')
 
 
-file.seek(0x8800000)
+file.seek(0x8800C00)
 
 file.write("Target Camera 1/3")
 with open("bin/CAMERA.bin", "rb") as bin:
@@ -20,7 +20,7 @@ file.write("Target Camera 2/3")
 
 file.write(
     "_L 0xD0000001 0x10000110\n"
-    "_L 0x200E5F88 0x0A200004\n"
+    "_L 0x200E5F88 0x0A200304\n"
     "_L 0x200E5F8C 0x00000000\n"
     
     "_L 0xD0000001 0x10000140\n"
@@ -51,7 +51,7 @@ file.write(
 )
 
 file.write("Target Camera UI 1/2")
-file.seek(0x08800A00)
+file.seek(0x08801600)
 with open("bin/RENDER.bin", "rb") as bin:
     file.write_once(bin.read())
 
@@ -61,6 +61,6 @@ file.write(
     "_L 0xE0036167 0x01457ca0\n"
     "_L 0xE002004b 0x11563adc\n"
 )
-file.write(b'\x80\x02\x20\x0a')
+file.write(b'\x80\x05\x20\x0a')
 file.write(b'\x00\x00\x00\x00')
 file.close()

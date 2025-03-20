@@ -11,7 +11,7 @@ CHEAT_FILE := CHEAT.TXT
 $(CHEAT_FILE):
 	mkdir -p bin
 	armips src/src.asm
-	python gencwcheat.py
+	python3 gencwcheat.py
 
 modio:
 	if [ ! -d modio ]; then \

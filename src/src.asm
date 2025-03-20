@@ -23,7 +23,7 @@ icon_y equ 225
 	sh			orig, value & 0xFFFF(at)
 .endmacro
 
-.createfile "./bin/CAMERA.bin", 0x8800000
+.createfile "./bin/CAMERA.bin", 0x8800C00
 	// constants
 .area 0x10, 0x0
 pi2:
@@ -78,23 +78,23 @@ magic:
 	
 	lui			a3, 0x880
 	
-	lv.s		s002, 0x00(a3)  ; loads 2/pi
+	lv.s		s002, 0xC00(a3)  ; loads 2/pi
 	vdiv.s		s003, s003, s002
 	vsgn.s		s001, s001
 	vmul.s		s003, s003, s001
 	
 	; angle is ready in radians
-	lv.s		s002, 0x04(a3)  ; loads pi
+	lv.s		s002, 0xC04(a3)  ; loads pi
 	vadd.s		s003, s003, s002
 	
-	lv.s		s002, 0x0C(a3)  ; loads 0
+	lv.s		s002, 0xC0C(a3)  ; loads 0
 	vsge.s		s000, s001, s002
 	
-	lv.s		s002, 0x04(a3)  ; loads pi
+	lv.s		s002, 0xC04(a3)  ; loads pi
 	vmul.s		s002, s000, s002
 	vadd.s		s003, s003, s002
 	
-	lv.s		s002, 0x08(a3)  ; loads mariana's constant
+	lv.s		s002, 0xC08(a3)  ; loads mariana's constant
 	vmul.s		s003, s003, s002
 	vf2in.s		s000, s003, 0x0
 	
@@ -141,7 +141,7 @@ selected_monster:
 
 .close
 
-.createfile "./bin/RENDER.bin", 0x08800A00
+.createfile "./bin/RENDER.bin", 0x08801600
 ;  ICON RENDERING
 
 .func render
@@ -166,6 +166,8 @@ selected_monster:
     nop
 
     li          a0, gpu_code
+    li          a2, 0
+    li          a3, 0
     jal         0x08960CF8; sceGeListEnQueue
     li          a1, 0x0
     

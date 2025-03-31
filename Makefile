@@ -9,15 +9,13 @@ CHEAT_FILE := CHEAT.TXT
 .PHONY: deps, armips, modio
 
 $(CHEAT_FILE):
-	mkdir -p bin
-	armips src/src.asm
+	armips src/src.asm -sym2 ./bin/target_cam.sym
 	python3 gencwcheat.py
 
 modio:
 	if [ ! -d modio ]; then \
 		git clone $(MODIO_URL); \
 	fi
-	mv modio/ModIO/cwcheatio.py ./
 
 armips:
 	if [ ! -d armips ]; then \

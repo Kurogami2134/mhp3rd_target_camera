@@ -1,7 +1,6 @@
-var = 142609660
+var = 142609676
 
-#from filewrappers import CWCheatFileDescriptor as cwcheatfd
-from cwcheatio import CwCheatIO
+from ModIO import CwCheatIO
 
 file = CwCheatIO("CHEATS.TXT")
 

@@ -2,6 +2,9 @@
 
 monster_pointer equ 0x09DA9860
 player_area equ 0x8B24979
+sceGeListEnQueue equ 0x08960CF8
+ViewMatrix equ 0x09B486B0
+crosshair_tex_ptr equ 0x9fff360
 
 icon_x equ 0
 icon_y equ 225
@@ -24,7 +27,8 @@ icon_y equ 225
 .endmacro
 
 .createfile "./bin/CAMERA.bin", 0x8800C00
-	// constants
+
+; Constants
 .area 0x10, 0x0
 pi2:
 	.word 0x3f22f983  ; pi/2
@@ -61,6 +65,10 @@ magic:
 
 	jal			@monster_in_area  ; check if selected monster is in the area
 	nop
+
+    li	        a3,0x40
+	lui	        t6,0x880
+	sh	        a3,0x17D8(t6)
 	
 	; lood monster coordinates
 	lv.s		s002, 0x80(t7)
@@ -118,6 +126,7 @@ magic:
 	; load old vfpu register and return
 	lw			ra, 0x4(sp)
 	addiu		ra, ra, 0xC
+    nop; for some reason next line's sp turns to t8 if this isn't here
 	lv.q		c000, 0x8(sp)
 	jr			ra
 	addiu		sp, sp, 0x18
@@ -168,8 +177,10 @@ selected_monster:
     li          a0, gpu_code
     li          a2, 0
     li          a3, 0
-    jal         0x08960CF8; sceGeListEnQueue
+    jal         sceGeListEnQueue
     li          a1, 0x0
+
+    b           crosshair_stuff
     
 @render_return:
 
@@ -306,9 +317,170 @@ normal_tex_load:
     addiu       a1, a1, 42
     sh          a1, 0x10(at)
 
+ret:
     jr          ra
     nop
 .endfunc
+
+crosshair_timer:
+    .word       0xDEADBEEF
+
+crosshair_stuff:
+    li          a1, crosshair_timer
+    lh          a0, 0x0(a1)
+    beq         a0, zero, @render_return
+    nop
+    addiu       a0, a0, -0x1
+    sh          a0, 0x0(a1)
+
+    ; set texture addr
+    li          a0, crosshair_tex_ptr
+    lw          a0, 0x0(a0)
+    sll         a0, a0, 8
+    srl         a0, a0, 8
+    lui         a1, 0xA000
+    or          a1, a0, a1
+    li          a2, crosshair_tex_add
+    sw          a1, 0x0(a2)
+
+    ; set clut addr
+    li          a1, 0x8210
+    add         a0, a0, a1
+    lui         a1, 0xB000
+    or          a1, a0, a1
+    li          a2, crosshair_clut_add
+    sw          a1, 0x0(a2)
+
+world_to_screen:  ; thanks pggkun
+    ; load view matrix
+    li      a0, ViewMatrix
+
+    lv.q    r100, 0x00(a0)
+    lv.q    r101, 0x10(a0)
+    lv.q    r102, 0x20(a0)
+    lv.q    r103, 0x30(a0)
+    
+    li      a0, monster_pointer
+    lih     a1, selected_monster
+    addu    a0, a0, a1
+    lw		a0, 0x0(a0)
+
+    ; skip if monster not in area
+    lb			a1, 0xD6(a0)
+	lib			a2, player_area
+    bne         a2, a1, @render_return
+    nop
+
+    ; load monster coords
+    lv.q  c500, 0x80(a0)
+    vone.s  s503
+
+    ; view matrix * monster coords
+    vtfm4.q r600, m100, c500
+
+    ; set projection matrix
+    vzero.q  c500
+    vzero.q  c510
+    vzero.q  c520
+    vzero.q  c530
+
+    li	a0,	0x3f9b8c00
+    mtv	a0, s500
+
+    li	a0, 0x40093eff
+    mtv	a0, s511
+
+    li	a0, 0xbf800000
+    mtv	a0, s522
+
+    li	a0, 0xbf800000
+    mtv	a0, s532
+
+    li	a0, 0xc2700000
+    mtv	a0, s523
+
+    ; projection matrix * view matrix * monster coords
+    vtfm4.q r601, M500, r600
+
+    vdiv.s s602, s601, s631
+    vdiv.s s612, s611, s631
+    vdiv.s s622, s621, s631
+
+    li	a0, 0x43f00000
+    mtv	a0, s600
+
+    li	a0, 0x43880000
+    mtv	a0, s610
+
+    li	a0, 0x3f000000
+    mtv	a0, s620
+
+    vadd.s s602, s602, s630
+    vmul.s s602, s602, s620
+    vmul.s s602, s602, s600 ;result x
+
+    vsub.s s612, s630, s612
+    vmul.s s612, s612, s620
+    vmul.s s612, s612, s610 ;result y
+
+    ; set crosshair vertices
+    vf2iz.p     r602, r602, 0
+    mfv         a1, s602
+    mfv         a2, s612
+    addiu       a1, a1, -0xC
+    addiu       a2, a2, -0x15
+
+    li          a0, crosshair_vertices
+    sh          a1, 0x08(a0)
+    sh          a2, 0x0A(a0)
+
+    addiu       a1, a1, 25
+    addiu       a2, a2, 25
+    sh          a1, 0x18(a0)
+    sh          a2, 0x1A(a0)
+
+
+    li          a0, crosshair_gpu
+    li          a2, 0
+    li          a3, 0
+    jal         sceGeListEnQueue
+    li          a1, 0x0
+
+    b           @render_return
+    nop
+.align 0x10
+
+crosshair_gpu:
+    offset      0
+    base        8
+    vtype       1, 2, 7, 0, 2, 0, 0, 0
+    tfilter     0, 0
+    tmode       1, 0, 0
+    tpf         4
+
+crosshair_tex_add:
+    tbp0        0x6AA950
+    tbw0        0x100, 9
+    
+    tsize0      8, 8
+
+    clutf       3, 0xff
+    clutaddhi   0x09
+    
+    vaddr       crosshair_vertices-0x08000000
+    tme         1
+    tfunc       0, 1
+
+crosshair_clut_add:
+    clutaddlo     0x6AA950+0x8210
+    load_clut   2
+    tflush
+    prim        2, 6
+
+    finish
+    end
+
+.align 0x10
 
 gpu_code:
     offset      0
@@ -367,6 +539,9 @@ vertices:
 select_vertices:
     vertex      129, 56, 0xFFFFFFFF, icon_x+10, icon_y+32, 0
     vertex      140, 63, 0xFFFFFFFF, icon_x+10+22, icon_y+32+14, 0
+crosshair_vertices:
+    vertex      57, 142, 0xFFFFFFFF, 0, 0, 0
+    vertex      82, 167, 0xFFFFFFFF, 100, 100, 0
 .close
 
 .warning "Selected monster: " + selected_monster

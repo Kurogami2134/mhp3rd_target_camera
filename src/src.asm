@@ -7,13 +7,8 @@ ViewMatrix equ 0x09B486B0
 crosshair_tex_ptr equ 0x9fff360
 
 icon_size equ 42
-SELECTED_OPACITY equ 100
-NOT_SELECTED_OPACITY equ 20
 icon_x equ 0
 icon_y equ 225
-
-NOT_SEL_COLOR equ (255*NOT_SELECTED_OPACITY/100)
-SEL_COLOR equ (255*SELECTED_OPACITY/100)
 
 .include "./src/gpu_macros.asm"
 

@@ -1,4 +1,4 @@
-var = 142609676
+var = 142609692
 
 from ModIO import CwCheatIO
 

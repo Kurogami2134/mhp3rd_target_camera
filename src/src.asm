@@ -6,6 +6,8 @@ sceGeListEnQueue equ 0x08960CF8
 ViewMatrix equ 0x09B486B0
 crosshair_tex_ptr equ 0x9fff360
 
+CROSSHAIR_DURATION equ 45
+
 icon_size equ 42
 icon_x equ 0
 icon_y equ 225
@@ -44,6 +46,10 @@ magic:
 	addiu		sp, sp, -0x18
 	sv.q		c000, 0x8(sp)
 	sw			ra, 0x4(sp)
+
+    li          a3, crosshair_timer
+    li          t7, CROSSHAIR_DURATION
+    sh          t7, 0x0(a3)
 	
 	lih			t7, selected_monster  ; load selected monster
 	

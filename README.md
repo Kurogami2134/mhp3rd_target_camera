@@ -1,3 +1,7 @@
+# ARCHIVED
+
+This repo's been archived and replaced with [this one](https://github.com/Kurogami2134/mhp3rd_hd_target_camera). For all purposes refer to that version. This will only be kept online because it was the very first piece of assembly code ever written by me, and I don't really want to delete it.
+
 # MHP3rd Target Camera
 
 Adds target camera, similar to that of Monster Hunter 4 to Monster Hunter Portable 3rd.
